@@ -3,4 +3,4 @@ project(TEPmax3sat)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(TEPmax3sat main.cpp)
+add_executable(TEPmax3sat main.cpp Max3SatProblem.cpp Max3SatProblem.h Optimizer.cpp Optimizer.h)
