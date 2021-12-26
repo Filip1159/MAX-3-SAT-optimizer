@@ -1,12 +1,13 @@
 #include <iostream>
-#include "Max3SatProblem.h"
+#include "Optimizer.h"
 
 int main() {
-    Max3SatProblem problem;
-    problem.setFilename(R"(C:\Users\PAVILION\CLionProjects\TEPmax3sat\clauses\50\m3s_50_0.txt)");
-    problem.load();
-    problem.setVariablesSize(50);
-    cout << problem.compute();
+    Optimizer optimizer;
+    optimizer.initialize();
+    optimizer.setPopulationSize(10);
+    optimizer.setGenotypeSize(50);
+    optimizer.setCrossoverProbability(0.3);
+    optimizer.setMutationProbability(0.2);
 
     return 0;
 }

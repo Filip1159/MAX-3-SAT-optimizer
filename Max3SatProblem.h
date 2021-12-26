@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Individual.h"
 
 using namespace std;
 
@@ -11,11 +12,11 @@ private:
 public:
     void setNumber(int n);
     void setNegated(bool n);
-    int getNumber() const;
-    bool isNegated() const;
+    [[nodiscard]] int getNumber() const;
+    [[nodiscard]] bool isNegated() const;
     void loadFromString(string str);
-    string toString() const;
-    bool isSatisfied(bool var) const;
+    [[nodiscard]] string toString() const;
+    [[nodiscard]] bool isSatisfied(bool var) const;
 };
 
 class Clause {
@@ -31,8 +32,6 @@ public:
 class Max3SatProblem {
 private:
     string filename;
-    bool* variables;
-    int variablesSize;
     vector<Clause*>* clauses;
 
 public:
@@ -40,6 +39,5 @@ public:
     ~Max3SatProblem();
     void setFilename(const string &filename);
     void load();
-    double compute();
-    void setVariablesSize(int size);
+    double compute(Individual* individual);
 };

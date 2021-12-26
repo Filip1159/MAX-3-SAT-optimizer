@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <ctime>
 
 Max3SatProblem::Max3SatProblem() {
     clauses = new vector<Clause*>;
@@ -31,25 +30,16 @@ void Max3SatProblem::load() {
     stream.close();
 }
 
-double Max3SatProblem::compute() {
+double Max3SatProblem::compute(Individual* individual) {
     int satisfied = 0;
     for (auto clause : *clauses) {
         ClauseVariable* vars = clause->getVariables();
-        bool var0 = variables[vars[0].getNumber()];
-        bool var1 = variables[vars[1].getNumber()];
-        bool var2 = variables[vars[2].getNumber()];
-        if (clause->isSatisfied(var0, var1, var2)) satisfied++;
+        bool gene0 = individual->getSingleGene(vars[0].getNumber());
+        bool gene1 = individual->getSingleGene(vars[1].getNumber());
+        bool gene2 = individual->getSingleGene(vars[2].getNumber());
+        if (clause->isSatisfied(gene0, gene1, gene2)) satisfied++;
     }
     return (double)satisfied/clauses->size();
-}
-
-void Max3SatProblem::setVariablesSize(int size) {
-    variablesSize = size;
-    variables = new bool[size];
-    srand(time(NULL));
-    for (int i=0; i<size; i++) {
-        variables[i] = rand() % 2;
-    }
 }
 
 int ClauseVariable::getNumber() const {
