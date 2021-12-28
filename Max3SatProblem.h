@@ -23,6 +23,7 @@ class Clause {
 private:
     ClauseVariable* variables;
 public:
+    ~Clause();
     void loadFromString(string str);
     string toString();
     bool isSatisfied(bool var0, bool var1, bool var2);

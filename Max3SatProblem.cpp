@@ -72,6 +72,10 @@ bool ClauseVariable::isSatisfied(bool var) const {
     return var == !isNegated();
 }
 
+Clause::~Clause() {
+    delete variables;
+}
+
 void Clause::loadFromString(string str) {
     str = str.substr(2, str.length()-4);
     string variableCode;

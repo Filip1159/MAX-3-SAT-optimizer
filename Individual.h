@@ -12,7 +12,8 @@ private:
 
 public:
     Individual();
-    Individual(int genotypeSize);
+    ~Individual();
+    explicit Individual(int genotypeSize);
     explicit Individual(vector<bool> *newGenotype);
     Individual** crossover(Individual* other);
     void mutation(double probability);

@@ -6,6 +6,10 @@ Individual::Individual() {
     srand(time(nullptr));  // NOLINT
 }
 
+Individual::~Individual() {
+    delete genotype;
+}
+
 Individual::Individual(int genotypeSize) {
     genotype = new vector<bool>();
     srand(time(nullptr));  // NOLINT

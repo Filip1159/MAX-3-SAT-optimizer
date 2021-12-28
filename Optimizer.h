@@ -17,6 +17,7 @@ private:
 
 public:
     Optimizer();
+    ~Optimizer();
     void setPopulationSize(int newPopulationSize);
     [[nodiscard]] int getPopulationSize() const;
     void setCrossoverProbability(double newCrossoverProbability);

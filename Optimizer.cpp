@@ -8,6 +8,15 @@ Optimizer::Optimizer() {
     mutationProbability = 0;
 }
 
+Optimizer::~Optimizer() {
+    delete problem;
+    for (auto & i : *population) {
+        delete i;
+    }
+    delete population;
+}
+
+
 void Optimizer::setPopulationSize(int newPopulationSize) {
     populationSize = newPopulationSize;
 }
