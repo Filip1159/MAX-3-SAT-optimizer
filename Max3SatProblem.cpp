@@ -25,7 +25,6 @@ void Max3SatProblem::load() {
         auto* clause = new Clause();
         clause->loadFromString(line);
         clauses->push_back(clause);
-        cout << clause->toString() << '\n';
     }
     stream.close();
 }

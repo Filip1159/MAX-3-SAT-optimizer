@@ -2,7 +2,6 @@
 #include <vector>
 #include "Individual.h"
 #include "Max3SatProblem.h"
-#include "SmartPointer.h"
 
 using namespace std;
 
@@ -12,12 +11,15 @@ private:
     double crossoverProbability;
     double mutationProbability;
     int genotypeSize;
-    vector<SmartPointer<Individual>*>* population;
+    vector<Individual*>* population;
     Max3SatProblem* problem;
 
 public:
     Optimizer();
     ~Optimizer();
+    void setProblem(Max3SatProblem* newProblem);
+    [[nodiscard]] Max3SatProblem* getProblem() const;
+    [[nodiscard]] vector<Individual*>* getPopulation() const;
     void setPopulationSize(int newPopulationSize);
     [[nodiscard]] int getPopulationSize() const;
     void setCrossoverProbability(double newCrossoverProbability);
@@ -29,5 +31,5 @@ public:
 
     void initialize();
     void runIteration();
-    SmartPointer<Individual>* selectParent();
+    Individual* selectParent();
 };
