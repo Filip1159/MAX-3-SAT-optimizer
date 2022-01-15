@@ -81,7 +81,7 @@ int ClauseVariable::setNumber(int n) {
 }
 
 int ClauseVariable::loadFromString(string &str) {
-    setNegated(str.starts_with('-'));
+    setNegated(str.substr(0, 1) == "-");
     if (isNegated()) str.erase(0, 1);
     int num;
     try { num = stoi(str); }

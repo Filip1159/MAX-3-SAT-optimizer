@@ -2,16 +2,10 @@
 #include <random>
 #include "Optimizer.h"
 
-const int POPULATION_SIZE = 50;
-const double CROSSOVER_PROBABILITY = .5;
-const double MUTATION_PROBABILITY = .01;
-const string FILENAME = R"(C:\Users\PAVILION\CLionProjects\TEPmax3sat\clauses\350\m3s_350_0.txt)"; // NOLINT
+#define FILENAME R"(C:\Users\PAVILION\CLionProjects\TEPmax3sat\clauses\350\m3s_350_0.txt)"
 
 int main() {
-    Optimizer optimizer;
-    optimizer.setPopulationSize(POPULATION_SIZE);
-    optimizer.setCrossoverProbability(CROSSOVER_PROBABILITY);
-    optimizer.setMutationProbability(MUTATION_PROBABILITY);
+    Optimizer optimizer;  // constructor with default parameter values
     optimizer.setFilename(FILENAME);
     optimizer.initialize();
     Max3SatProblem* problem = optimizer.getProblem();

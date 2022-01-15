@@ -2,9 +2,17 @@
 #include <vector>
 #include "Individual.h"
 #include "Max3SatProblem.h"
+#include "Random.h"
 
 #define OPTIMIZER_OK 0
 #define OPTIMIZER_ERROR_ILLEGAL_VALUE -1
+
+#define OPTIMIZER_MIN_POPULATION_SIZE 10
+#define OPTIMIZER_MIN_TOURNAMENT_SIZE 2
+#define OPTIMIZER_DEF_POPULATION_SIZE 50
+#define OPTIMIZER_DEF_CROSSOVER_PROBABILITY .5
+#define OPTIMIZER_DEF_MUTATION_PROBABILITY .01
+#define OPTIMIZER_DEF_TOURNAMENT_SIZE 15
 
 using namespace std;
 
@@ -14,10 +22,9 @@ private:
     double crossoverProbability;
     double mutationProbability;
     int genotypeSize;
+    int tournamentSize;
     vector<Individual*>* population;
     Max3SatProblem* problem;
-    random_device* crypto_random_generator;
-    uniform_real_distribution<double>* doubleDistro;
 
 public:
     Optimizer();
@@ -25,14 +32,14 @@ public:
     void setProblem(Max3SatProblem* newProblem);
     Max3SatProblem* getProblem() const;  // NOLINT
     vector<Individual*>* getPopulation() const;  // NOLINT
-    int setPopulationSize(int newPopulationSize);
+    int setPopulationSize(int newSize);
     int getPopulationSize() const;  // NOLINT
-    int setCrossoverProbability(double newCrossoverProbability);
+    int setCrossoverProbability(double newProbability);
     double getCrossoverProbability() const;  // NOLINT
-    int setMutationProbability(double newMutationProbability);
+    int setMutationProbability(double newProbability);
     double getMutationProbability() const;  // NOLINT
-    int setGenotypeSize(int newGenotypeSize);
-    int getGenotypeSize() const;  // NOLINT
+    int setTournamentSize(int newSize);
+    int getTournamentSize() const;  // NOLINT
 
     void setFilename(const string &filename);
     void initialize();

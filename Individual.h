@@ -1,9 +1,8 @@
 #pragma once
 #include <vector>
-#include <ctime>
 #include <string>
-#include <random>
 #include <iostream>
+#include "Random.h"
 
 #define INDIVIDUAL_OK 0
 #define INDIVIDUAL_BAD_GENE_NUMBER -1
@@ -16,13 +15,15 @@ using namespace std;
 class Individual {
 private:
     vector<bool>* genotype;
+    bool isFitnessUpToDate;
+    double savedFitness;
 
 public:
     Individual();
-    ~Individual();
     explicit Individual(int genotypeSize);
     explicit Individual(vector<bool> *newGenotype);
     Individual(const Individual& other);
+    ~Individual();
     Individual** crossover(Individual* other);
     int mutation(double probability);
     double fitness(Max3SatProblem* problem);

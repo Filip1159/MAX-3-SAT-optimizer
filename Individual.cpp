@@ -4,33 +4,42 @@
 
 Individual::Individual() {
     genotype = new vector<bool>();
+    isFitnessUpToDate = false;
+    savedFitness = 0;
+}
+
+Individual::Individual(int genotypeSize) {
+    genotype = new vector<bool>();
+    isFitnessUpToDate = false;
+    savedFitness = 0;
+    for (int i=0; i<genotypeSize; i++)
+        genotype->push_back(Random::getBool());
+}
+
+Individual::Individual(vector<bool> *newGenotype) {
+    genotype = newGenotype;
+    isFitnessUpToDate = false;
+    savedFitness = 0;
+}
+
+Individual::Individual(const Individual& other) {
+    genotype = new vector<bool>();
+    isFitnessUpToDate = false;
+    savedFitness = 0;
+    for (auto && i : *other.genotype)
+        genotype->push_back(i);
 }
 
 Individual::~Individual() {
     delete genotype;
 }
 
-Individual::Individual(int genotypeSize) {
-    random_device crypto_random_generator;
-    uniform_int_distribution<int> intDistro(0, 1);
-    genotype = new vector<bool>();
-    for (int i=0; i<genotypeSize; i++) {
-        genotype->push_back(intDistro(crypto_random_generator));
-    }
-}
-
-Individual::Individual(vector<bool> *newGenotype) {
-    genotype = newGenotype;
-}
-
 Individual** Individual::crossover(Individual* other) {
     auto** newGenotypes = new vector<bool>*[2];
     newGenotypes[0] = new vector<bool>();
     newGenotypes[1] = new vector<bool>();
-    random_device crypto_random_generator;
-    uniform_int_distribution<int> intDistro(0, 1);
     for (int i=0; i<genotype->size(); i++) {
-        bool gene = (intDistro(crypto_random_generator) == 0 ? genotype : other->genotype)->at(i);  // NOLINT
+        bool gene = (Random::getBool() ? genotype : other->genotype)->at(i);  // NOLINT
         newGenotypes[0]->push_back(gene);
         newGenotypes[1]->push_back(!gene);
     }
@@ -43,17 +52,19 @@ Individual** Individual::crossover(Individual* other) {
 
 int Individual::mutation(double probability) {
     if (genotype->empty()) return INDIVIDUAL_EMPTY_GENOTYPE;
-    random_device crypto_random_generator;
-    uniform_int_distribution<int> intDistro(0, 100);
     for (auto && i : *genotype) {
-        double r = (double)(intDistro(crypto_random_generator) % 100) / 100;  // NOLINT
+        float r = Random::getFloat();  // NOLINT
         if (r < probability) i.flip();
     }
     return INDIVIDUAL_OK;
 }
 
 double Individual::fitness(Max3SatProblem* problem) {
-    return problem->compute(this);
+    if (!isFitnessUpToDate) {
+        isFitnessUpToDate = true;
+        savedFitness = problem->compute(this);
+    }
+    return savedFitness;
 }
 
 int Individual::getSingleGene(int number) {
@@ -64,10 +75,4 @@ int Individual::getSingleGene(int number) {
 void Individual::print() {
     for (auto && i : *genotype)
         cout << (i ? '1' : '0');
-}
-
-Individual::Individual(const Individual& other) {
-    genotype = new vector<bool>();
-    for (auto && i : *other.genotype)
-        genotype->push_back(i);
 }

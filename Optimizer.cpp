@@ -1,4 +1,5 @@
 #include "Optimizer.h"
+
 #include <iostream>
 
 using namespace std;
@@ -6,12 +7,11 @@ using namespace std;
 Optimizer::Optimizer() {
     population = new vector<Individual*>();
     problem = new Max3SatProblem();
-    populationSize = 0;
-    crossoverProbability = 0;
-    mutationProbability = 0;
+    populationSize = OPTIMIZER_DEF_POPULATION_SIZE;
+    crossoverProbability = OPTIMIZER_DEF_CROSSOVER_PROBABILITY;
+    mutationProbability = OPTIMIZER_DEF_MUTATION_PROBABILITY;
     genotypeSize = 0;
-    crypto_random_generator = new random_device();
-    doubleDistro = new uniform_real_distribution<double>(0, 1);
+    tournamentSize = OPTIMIZER_DEF_TOURNAMENT_SIZE;
 }
 
 Optimizer::~Optimizer() {
@@ -21,7 +21,7 @@ Optimizer::~Optimizer() {
 }
 
 int Optimizer::setPopulationSize(int newSize) {
-    if (newSize < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    if (newSize < OPTIMIZER_MIN_POPULATION_SIZE) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
     populationSize = newSize;
     return OPTIMIZER_OK;
 }
@@ -50,16 +50,6 @@ double Optimizer::getMutationProbability() const {
     return mutationProbability;
 }
 
-int Optimizer::setGenotypeSize(int newSize) {
-    if (newSize < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
-    genotypeSize = newSize;
-    return OPTIMIZER_OK;
-}
-
-int Optimizer::getGenotypeSize() const {
-    return genotypeSize;
-}
-
 void Optimizer::initialize() {
     problem->loadClausesFromFile();
     genotypeSize = problem->calculateGenotypeSize();
@@ -72,7 +62,7 @@ void Optimizer::runIteration() {
     while (newPopulation->size() < populationSize) {
         Individual* firstParent = selectParent();
         Individual* secondParent = selectParent();
-        if ((*doubleDistro)(*crypto_random_generator) < crossoverProbability) {
+        if (Random::getFloat() < crossoverProbability) {
             Individual** children = firstParent->crossover(secondParent);
             auto* firstChild = children[0];
             auto* secondChild = children[1];
@@ -90,34 +80,18 @@ void Optimizer::runIteration() {
             newPopulation->push_back(secondChild);
         }
     }
-//    double oldFit = maxFit(population);
-//    double newFit = maxFit(newPopulation);
-//    cout << "oldFit = " << oldFit << " newFit = " << newFit << '\n';
-//    if (newFit > oldFit) {
-        //cout << "replacing\n";
-        for (auto & i : *population) {
-            delete i;
-        }
-        delete population;
-        population = newPopulation;
-//    } else {
-//        //cout << "no action\n";
-//        for (auto & i : *newPopulation) {
-//            delete i;
-//        }
-//        delete newPopulation;
-//    }
+    for (auto & i : *population) delete i;
+    delete population;
+    population = newPopulation;
 }
 
-#define TOURNAMENT_SIZE 15
 Individual* Optimizer::selectParent() {
-    auto** individuals = new Individual*[TOURNAMENT_SIZE];
-    for (int i=0; i<TOURNAMENT_SIZE; i++) {
-        individuals[i] = population->at((*doubleDistro)(*crypto_random_generator) * populationSize);
-    }
+    auto** individuals = new Individual*[tournamentSize];
+    for (int i=0; i<tournamentSize; i++)
+        individuals[i] = population->at(Random::getFloat() * populationSize);
     double bestFit = 0;
     int winnerIndex;
-    for (int i=0; i<TOURNAMENT_SIZE; i++) {
+    for (int i=0; i<tournamentSize; i++) {
         double fitness = individuals[i]->fitness(problem);
         if (fitness > bestFit) {
             bestFit = fitness;
@@ -145,7 +119,7 @@ vector<Individual*>* Optimizer::getPopulation() const {
 double Optimizer::maxFit(vector<Individual*>* individuals) {
     double max = 0;
     for (auto & individual : *individuals) {
-        double fit = problem->compute(individual);
+        double fit = individual->fitness(problem);
         if (fit > max) max = fit;
     }
     return max;
@@ -153,4 +127,14 @@ double Optimizer::maxFit(vector<Individual*>* individuals) {
 
 void Optimizer::setFilename(const string &filename) {
     problem->setFilename(filename);
+}
+
+int Optimizer::setTournamentSize(int newSize) {
+    if (newSize < OPTIMIZER_MIN_TOURNAMENT_SIZE || newSize > populationSize) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    tournamentSize = newSize;
+    return OPTIMIZER_OK;
+}
+
+int Optimizer::getTournamentSize() const {
+    return tournamentSize;
 }
