@@ -9,46 +9,51 @@ Optimizer::Optimizer() {
     populationSize = 0;
     crossoverProbability = 0;
     mutationProbability = 0;
+    genotypeSize = 0;
+    crypto_random_generator = new random_device();
+    doubleDistro = new uniform_real_distribution<double>(0, 1);
 }
 
 Optimizer::~Optimizer() {
-    cout << "dest1\n";
     delete problem;
-    for (auto & i : *population) {
-        cout << "dest2\n";
-        delete i;
-    }
-    cout << "dest3\n";
+    for (auto & i : *population) delete i;
     delete population;
 }
 
-
-void Optimizer::setPopulationSize(int newPopulationSize) {
-    populationSize = newPopulationSize;
+int Optimizer::setPopulationSize(int newSize) {
+    if (newSize < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    populationSize = newSize;
+    return OPTIMIZER_OK;
 }
 
 int Optimizer::getPopulationSize() const {
     return populationSize;
 }
 
-void Optimizer::setCrossoverProbability(double newCrossoverProbability) {
-    crossoverProbability = newCrossoverProbability;
+int Optimizer::setCrossoverProbability(double newProbability) {
+    if (newProbability < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    crossoverProbability = newProbability;
+    return OPTIMIZER_OK;
 }
 
 double Optimizer::getCrossoverProbability() const {
     return crossoverProbability;
 }
 
-void Optimizer::setMutationProbability(double newMutationProbability) {
-    mutationProbability = newMutationProbability;
+int Optimizer::setMutationProbability(double newProbability) {
+    if (newProbability < 0 || newProbability > 1) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    mutationProbability = newProbability;
+    return OPTIMIZER_OK;
 }
 
 double Optimizer::getMutationProbability() const {
     return mutationProbability;
 }
 
-void Optimizer::setGenotypeSize(int newGenotypeSize) {
-    genotypeSize = newGenotypeSize;
+int Optimizer::setGenotypeSize(int newSize) {
+    if (newSize < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    genotypeSize = newSize;
+    return OPTIMIZER_OK;
 }
 
 int Optimizer::getGenotypeSize() const {
@@ -56,11 +61,10 @@ int Optimizer::getGenotypeSize() const {
 }
 
 void Optimizer::initialize() {
-    for (int i=0; i<populationSize; i++) {
+    problem->loadClausesFromFile();
+    genotypeSize = problem->calculateGenotypeSize();
+    for (int i=0; i<populationSize; i++)
         population->push_back(new Individual(genotypeSize));
-    }
-    problem->setFilename(R"(C:\Users\PAVILION\CLionProjects\TEPmax3sat\clauses\50\m3s_50_0.txt)");
-    problem->load();
 }
 
 void Optimizer::runIteration() {
@@ -68,7 +72,7 @@ void Optimizer::runIteration() {
     while (newPopulation->size() < populationSize) {
         Individual* firstParent = selectParent();
         Individual* secondParent = selectParent();
-        if ((double)(rand() % 100) / 100 < crossoverProbability) {
+        if ((*doubleDistro)(*crypto_random_generator) < crossoverProbability) {
             Individual** children = firstParent->crossover(secondParent);
             auto* firstChild = children[0];
             auto* secondChild = children[1];
@@ -78,27 +82,51 @@ void Optimizer::runIteration() {
             newPopulation->push_back(secondChild);
             delete children;
         } else {
-            firstParent->mutation(mutationProbability);
-            secondParent->mutation(mutationProbability);
-            newPopulation->push_back(new Individual(*firstParent));
-            newPopulation->push_back(new Individual(*secondParent));
+            auto firstChild = new Individual(*firstParent);
+            auto secondChild = new Individual(*secondParent);
+            firstChild->mutation(mutationProbability);
+            secondChild->mutation(mutationProbability);
+            newPopulation->push_back(firstChild);
+            newPopulation->push_back(secondChild);
         }
     }
-    for (auto & i : *population) {
-        delete i;
-    }
-    delete population;
-    population = newPopulation;
+//    double oldFit = maxFit(population);
+//    double newFit = maxFit(newPopulation);
+//    cout << "oldFit = " << oldFit << " newFit = " << newFit << '\n';
+//    if (newFit > oldFit) {
+        //cout << "replacing\n";
+        for (auto & i : *population) {
+            delete i;
+        }
+        delete population;
+        population = newPopulation;
+//    } else {
+//        //cout << "no action\n";
+//        for (auto & i : *newPopulation) {
+//            delete i;
+//        }
+//        delete newPopulation;
+//    }
 }
 
+#define TOURNAMENT_SIZE 15
 Individual* Optimizer::selectParent() {
-    Individual* firstIndividual = population->at(rand() % populationSize);
-    Individual* secondIndividual = population->at(rand() % populationSize);
-    if (firstIndividual->fitness(problem) > secondIndividual->fitness(problem)) {
-        return firstIndividual;
-    } else {
-        return secondIndividual;
+    auto** individuals = new Individual*[TOURNAMENT_SIZE];
+    for (int i=0; i<TOURNAMENT_SIZE; i++) {
+        individuals[i] = population->at((*doubleDistro)(*crypto_random_generator) * populationSize);
     }
+    double bestFit = 0;
+    int winnerIndex;
+    for (int i=0; i<TOURNAMENT_SIZE; i++) {
+        double fitness = individuals[i]->fitness(problem);
+        if (fitness > bestFit) {
+            bestFit = fitness;
+            winnerIndex = i;
+        }
+    }
+    Individual* toReturn = individuals[winnerIndex];
+    delete individuals;
+    return toReturn;
 }
 
 void Optimizer::setProblem(Max3SatProblem *newProblem) {
@@ -114,3 +142,15 @@ vector<Individual*>* Optimizer::getPopulation() const {
     return population;
 }
 
+double Optimizer::maxFit(vector<Individual*>* individuals) {
+    double max = 0;
+    for (auto & individual : *individuals) {
+        double fit = problem->compute(individual);
+        if (fit > max) max = fit;
+    }
+    return max;
+}
+
+void Optimizer::setFilename(const string &filename) {
+    problem->setFilename(filename);
+}

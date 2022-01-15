@@ -3,6 +3,12 @@
 #include <vector>
 #include "Individual.h"
 
+#define MAX3SAT_OK 0
+#define MAX3SAT_ERROR_ILLEGAL_VALUE -1
+#define MAX3SAT_BAD_STRING_FORMAT -2
+#define MAX3SAT_BAD_FILENAME -3
+#define MAX3SAT_CLAUSES_EMPTY -4
+
 using namespace std;
 
 class ClauseVariable {
@@ -10,13 +16,13 @@ private:
     int number;
     bool negated;
 public:
-    void setNumber(int n);
+    int setNumber(int n);
     void setNegated(bool n);
-    [[nodiscard]] int getNumber() const;
-    [[nodiscard]] bool isNegated() const;
-    void loadFromString(string str);
-    [[nodiscard]] string toString() const;
-    [[nodiscard]] bool isSatisfied(bool var) const;
+    int getNumber() const;  // NOLINT
+    bool isNegated() const;  // NOLINT
+    int loadFromString(string &str);
+    void print() const;
+    bool isSatisfied(bool var) const;  // NOLINT
 };
 
 class Clause {
@@ -24,8 +30,8 @@ private:
     ClauseVariable* variables;
 public:
     ~Clause();
-    void loadFromString(string str);
-    string toString();
+    int loadFromString(string &str);
+    void print() const;
     bool isSatisfied(bool var0, bool var1, bool var2);
     ClauseVariable* getVariables();
 };
@@ -34,11 +40,13 @@ class Max3SatProblem {
 private:
     string filename;
     vector<Clause*>* clauses;
+    int genotypeSize;
 
 public:
     Max3SatProblem();
     ~Max3SatProblem();
     void setFilename(const string &filename);
-    void load();
+    int loadClausesFromFile();
+    int calculateGenotypeSize();
     double compute(Individual* individual);
 };

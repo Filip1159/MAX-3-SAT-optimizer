@@ -3,6 +3,11 @@
 #include <ctime>
 #include <string>
 #include <random>
+#include <iostream>
+
+#define INDIVIDUAL_OK 0
+#define INDIVIDUAL_BAD_GENE_NUMBER -1
+#define INDIVIDUAL_EMPTY_GENOTYPE -2
 
 class Max3SatProblem;
 
@@ -19,8 +24,8 @@ public:
     explicit Individual(vector<bool> *newGenotype);
     Individual(const Individual& other);
     Individual** crossover(Individual* other);
-    void mutation(double probability);
+    int mutation(double probability);
     double fitness(Max3SatProblem* problem);
-    bool getSingleGene(int number);
-    string toString();
+    int getSingleGene(int number);
+    void print();
 };
