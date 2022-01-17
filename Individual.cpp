@@ -77,3 +77,11 @@ void Individual::print() {
     for (auto && i : *genotype)
         cout << (i ? '1' : '0');
 }
+
+int* Individual::getResultAsTable(int* resultLength) const {
+    int* result = new int[genotype->size()];
+    for (int i=0; i<genotype->size(); i++)
+        result[i] = genotype->at(i);
+    *resultLength = genotype->size();  // NOLINT
+    return result;
+}

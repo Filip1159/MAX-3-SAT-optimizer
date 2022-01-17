@@ -83,8 +83,10 @@ void Optimizer::findBestIndividual() {
             currentBest = individual;
         }
     }
-    if (bestIndividual == nullptr || maxFit > bestIndividual->fitness(problem))
+    if (bestIndividual == nullptr || maxFit > bestIndividual->fitness(problem)) {
+        if (bestIndividual != nullptr) delete bestIndividual;  // NOLINT
         bestIndividual = new Individual(*currentBest);
+    }
 }
 
 Individual* Optimizer::getBestIndividual() const {

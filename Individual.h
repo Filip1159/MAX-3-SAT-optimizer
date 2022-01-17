@@ -29,4 +29,6 @@ public:
     double fitness(Max3SatProblem* problem);
     int getSingleGene(int number);
     void print();
+
+    int* getResultAsTable(int* resultLength) const;
 };
