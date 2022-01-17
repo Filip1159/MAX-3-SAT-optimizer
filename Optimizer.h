@@ -11,7 +11,7 @@
 #define OPTIMIZER_MIN_TOURNAMENT_SIZE 2
 #define OPTIMIZER_DEF_POPULATION_SIZE 50
 #define OPTIMIZER_DEF_CROSSOVER_PROBABILITY .5
-#define OPTIMIZER_DEF_MUTATION_PROBABILITY .01
+#define OPTIMIZER_DEF_MUTATION_PROBABILITY .005
 #define OPTIMIZER_DEF_TOURNAMENT_SIZE 15
 
 using namespace std;
@@ -25,26 +25,30 @@ private:
     int tournamentSize;
     vector<Individual*>* population;
     Max3SatProblem* problem;
+    Individual* bestIndividual;
 
 public:
     Optimizer();
     ~Optimizer();
-    void setProblem(Max3SatProblem* newProblem);
-    Max3SatProblem* getProblem() const;  // NOLINT
-    vector<Individual*>* getPopulation() const;  // NOLINT
-    int setPopulationSize(int newSize);
-    int getPopulationSize() const;  // NOLINT
-    int setCrossoverProbability(double newProbability);
-    double getCrossoverProbability() const;  // NOLINT
-    int setMutationProbability(double newProbability);
-    double getMutationProbability() const;  // NOLINT
-    int setTournamentSize(int newSize);
-    int getTournamentSize() const;  // NOLINT
 
     void setFilename(const string &filename);
     void initialize();
     void runIteration();
     Individual* selectParent();
+    void findBestIndividual();
 
-    double maxFit(vector<Individual*>* population);
+    Max3SatProblem* getProblem() const;  // NOLINT
+    void setProblem(Max3SatProblem* newProblem);
+    vector<Individual*>* getPopulation() const;  // NOLINT
+
+    Individual* getBestIndividual() const;
+
+    int getPopulationSize() const;  // NOLINT
+    int setPopulationSize(int newSize);
+    double getCrossoverProbability() const;  // NOLINT
+    int setCrossoverProbability(double newProbability);
+    double getMutationProbability() const;  // NOLINT
+    int setMutationProbability(double newProbability);
+    int getTournamentSize() const;  // NOLINT
+    int setTournamentSize(int newSize);
 };

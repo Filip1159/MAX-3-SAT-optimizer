@@ -1,6 +1,5 @@
 #include "Individual.h"
 #include "Max3SatProblem.h"
-#include <random>
 
 Individual::Individual() {
     genotype = new vector<bool>();
@@ -24,8 +23,8 @@ Individual::Individual(vector<bool> *newGenotype) {
 
 Individual::Individual(const Individual& other) {
     genotype = new vector<bool>();
-    isFitnessUpToDate = false;
-    savedFitness = 0;
+    isFitnessUpToDate = other.isFitnessUpToDate;
+    savedFitness = other.savedFitness;
     for (auto && i : *other.genotype)
         genotype->push_back(i);
 }
@@ -56,6 +55,8 @@ int Individual::mutation(double probability) {
         float r = Random::getFloat();  // NOLINT
         if (r < probability) i.flip();
     }
+    isFitnessUpToDate = false;
+    savedFitness = 0;
     return INDIVIDUAL_OK;
 }
 

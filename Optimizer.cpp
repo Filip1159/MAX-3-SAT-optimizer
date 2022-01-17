@@ -12,42 +12,14 @@ Optimizer::Optimizer() {
     mutationProbability = OPTIMIZER_DEF_MUTATION_PROBABILITY;
     genotypeSize = 0;
     tournamentSize = OPTIMIZER_DEF_TOURNAMENT_SIZE;
+    bestIndividual = nullptr;
 }
 
 Optimizer::~Optimizer() {
     delete problem;
     for (auto & i : *population) delete i;
     delete population;
-}
-
-int Optimizer::setPopulationSize(int newSize) {
-    if (newSize < OPTIMIZER_MIN_POPULATION_SIZE) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
-    populationSize = newSize;
-    return OPTIMIZER_OK;
-}
-
-int Optimizer::getPopulationSize() const {
-    return populationSize;
-}
-
-int Optimizer::setCrossoverProbability(double newProbability) {
-    if (newProbability < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
-    crossoverProbability = newProbability;
-    return OPTIMIZER_OK;
-}
-
-double Optimizer::getCrossoverProbability() const {
-    return crossoverProbability;
-}
-
-int Optimizer::setMutationProbability(double newProbability) {
-    if (newProbability < 0 || newProbability > 1) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
-    mutationProbability = newProbability;
-    return OPTIMIZER_OK;
-}
-
-double Optimizer::getMutationProbability() const {
-    return mutationProbability;
+    delete bestIndividual;
 }
 
 void Optimizer::initialize() {
@@ -55,6 +27,7 @@ void Optimizer::initialize() {
     genotypeSize = problem->calculateGenotypeSize();
     for (int i=0; i<populationSize; i++)
         population->push_back(new Individual(genotypeSize));
+    findBestIndividual();
 }
 
 void Optimizer::runIteration() {
@@ -83,50 +56,78 @@ void Optimizer::runIteration() {
     for (auto & i : *population) delete i;
     delete population;
     population = newPopulation;
+    findBestIndividual();
 }
 
 Individual* Optimizer::selectParent() {
-    auto** individuals = new Individual*[tournamentSize];
-    for (int i=0; i<tournamentSize; i++)
-        individuals[i] = population->at(Random::getFloat() * populationSize);
     double bestFit = 0;
-    int winnerIndex;
+    Individual* winner;
     for (int i=0; i<tournamentSize; i++) {
-        double fitness = individuals[i]->fitness(problem);
+        Individual* selected = population->at(Random::getFloat() * populationSize);  // NOLINT
+        double fitness = selected->fitness(problem);
         if (fitness > bestFit) {
             bestFit = fitness;
-            winnerIndex = i;
+            winner = selected;
         }
     }
-    Individual* toReturn = individuals[winnerIndex];
-    delete individuals;
-    return toReturn;
+    return winner;
 }
 
-void Optimizer::setProblem(Max3SatProblem *newProblem) {
-    delete problem;
-    problem = newProblem;
-}
-
-Max3SatProblem* Optimizer::getProblem() const {
-    return problem;
-}
-
-vector<Individual*>* Optimizer::getPopulation() const {
-    return population;
-}
-
-double Optimizer::maxFit(vector<Individual*>* individuals) {
-    double max = 0;
-    for (auto & individual : *individuals) {
+void Optimizer::findBestIndividual() {
+    double maxFit = 0;
+    Individual* currentBest;
+    for (auto & individual : *population) {
         double fit = individual->fitness(problem);
-        if (fit > max) max = fit;
+        if (fit > maxFit) {
+            maxFit = fit;
+            currentBest = individual;
+        }
     }
-    return max;
+    if (bestIndividual == nullptr || maxFit > bestIndividual->fitness(problem))
+        bestIndividual = new Individual(*currentBest);
+}
+
+Individual* Optimizer::getBestIndividual() const {
+    return bestIndividual;
 }
 
 void Optimizer::setFilename(const string &filename) {
     problem->setFilename(filename);
+}
+
+int Optimizer::getPopulationSize() const {
+    return populationSize;
+}
+
+int Optimizer::setPopulationSize(int newSize) {
+    if (newSize < OPTIMIZER_MIN_POPULATION_SIZE) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    populationSize = newSize;
+    return OPTIMIZER_OK;
+}
+
+double Optimizer::getCrossoverProbability() const {
+    return crossoverProbability;
+}
+
+int Optimizer::setCrossoverProbability(double newProbability) {
+    if (newProbability < 0) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    crossoverProbability = newProbability;
+    return OPTIMIZER_OK;
+}
+
+double Optimizer::getMutationProbability() const {
+    return mutationProbability;
+}
+
+int Optimizer::setMutationProbability(double newProbability) {
+    if (newProbability < 0 || newProbability > 1) return OPTIMIZER_ERROR_ILLEGAL_VALUE;
+    mutationProbability = newProbability;
+    return OPTIMIZER_OK;
+}
+
+
+int Optimizer::getTournamentSize() const {
+    return tournamentSize;
 }
 
 int Optimizer::setTournamentSize(int newSize) {
@@ -135,6 +136,15 @@ int Optimizer::setTournamentSize(int newSize) {
     return OPTIMIZER_OK;
 }
 
-int Optimizer::getTournamentSize() const {
-    return tournamentSize;
+Max3SatProblem* Optimizer::getProblem() const {
+    return problem;
+}
+
+void Optimizer::setProblem(Max3SatProblem *newProblem) {
+    delete problem;
+    problem = newProblem;
+}
+
+vector<Individual*>* Optimizer::getPopulation() const {
+    return population;
 }
