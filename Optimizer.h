@@ -6,6 +6,8 @@
 
 #define OPTIMIZER_OK 0
 #define OPTIMIZER_ERROR_ILLEGAL_VALUE -1
+#define OPTIMIZER_ERROR_POPULATION_EMPTY -2
+#define OPTIMIZER_INIT_ERROR -2
 
 #define OPTIMIZER_MIN_POPULATION_SIZE 10
 #define OPTIMIZER_MIN_TOURNAMENT_SIZE 2
@@ -27,20 +29,20 @@ private:
     Max3SatProblem* problem;
     Individual* bestIndividual;
 
+    Individual* selectParent();
+    int findBestIndividual();
+
 public:
     Optimizer();
     ~Optimizer();
 
     void setFilename(const string &filename);
-    void initialize();
+    int initialize();
     void runIteration();
-    Individual* selectParent();
-    void findBestIndividual();
 
     Max3SatProblem* getProblem() const;  // NOLINT
     void setProblem(Max3SatProblem* newProblem);
     vector<Individual*>* getPopulation() const;  // NOLINT
-
     Individual* getBestIndividual() const;
 
     int getPopulationSize() const;  // NOLINT

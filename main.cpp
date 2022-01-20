@@ -6,9 +6,12 @@
 int main() {
     Optimizer optimizer;  // constructor with default parameter values
     optimizer.setFilename(FILENAME);
-    optimizer.initialize();
+    if (optimizer.initialize() != OPTIMIZER_OK) {
+        cout << "Error: optimizer.initialize() returned result other than OPTIMIZER_OK!\n";
+        return -1;
+    }
 
-    for (int repeats=0; repeats<2000; repeats++)
+    for (int repeats=0; repeats<200; repeats++)
         optimizer.runIteration();
 
     cout << optimizer.getBestIndividual()->fitness(optimizer.getProblem()) << '\n';

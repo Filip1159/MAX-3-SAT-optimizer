@@ -22,12 +22,13 @@ Optimizer::~Optimizer() {
     delete bestIndividual;
 }
 
-void Optimizer::initialize() {
-    problem->loadClausesFromFile();
-    genotypeSize = problem->calculateGenotypeSize();
+int Optimizer::initialize() {
+    if (problem->loadClausesFromFile() != OPTIMIZER_OK) return OPTIMIZER_INIT_ERROR;
+    if ((genotypeSize = problem->calculateGenotypeSize()) == MAX3SAT_CLAUSES_EMPTY) return OPTIMIZER_INIT_ERROR;
     for (int i=0; i<populationSize; i++)
         population->push_back(new Individual(genotypeSize));
-    findBestIndividual();
+    if (findBestIndividual() != OPTIMIZER_OK) return OPTIMIZER_INIT_ERROR;
+    return OPTIMIZER_OK;
 }
 
 void Optimizer::runIteration() {
@@ -53,6 +54,7 @@ void Optimizer::runIteration() {
             newPopulation->push_back(secondChild);
         }
     }
+    if (newPopulation->size() > populationSize) newPopulation->erase(newPopulation->end()-1);
     for (auto & i : *population) delete i;
     delete population;
     population = newPopulation;
@@ -73,7 +75,8 @@ Individual* Optimizer::selectParent() {
     return winner;
 }
 
-void Optimizer::findBestIndividual() {
+int Optimizer::findBestIndividual() {
+    if (population->empty()) return OPTIMIZER_ERROR_POPULATION_EMPTY;
     double maxFit = 0;
     Individual* currentBest;
     for (auto & individual : *population) {
@@ -87,6 +90,7 @@ void Optimizer::findBestIndividual() {
         if (bestIndividual != nullptr) delete bestIndividual;  // NOLINT
         bestIndividual = new Individual(*currentBest);
     }
+    return OPTIMIZER_OK;
 }
 
 Individual* Optimizer::getBestIndividual() const {

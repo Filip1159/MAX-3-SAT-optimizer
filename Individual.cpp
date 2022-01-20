@@ -52,7 +52,7 @@ Individual** Individual::crossover(Individual* other) {
 int Individual::mutation(double probability) {
     if (genotype->empty()) return INDIVIDUAL_EMPTY_GENOTYPE;
     for (auto && i : *genotype) {
-        float r = Random::getFloat();  // NOLINT
+        float r = Random::getFloat();
         if (r < probability) i.flip();
     }
     isFitnessUpToDate = false;
@@ -69,7 +69,7 @@ double Individual::fitness(Max3SatProblem* problem) {
 }
 
 int Individual::getSingleGene(int number) {
-    if (number > genotype->size()) return INDIVIDUAL_BAD_GENE_NUMBER;
+    if (number < 0 || number > genotype->size()) return INDIVIDUAL_BAD_GENE_NUMBER;
     return genotype->at(number);
 }
 
